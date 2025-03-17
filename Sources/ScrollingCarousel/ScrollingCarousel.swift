@@ -81,16 +81,29 @@ public struct ScrollingCarousel<Content: View>: View {
             .scrollTargetBehavior(.viewAligned)
             
             if showIndicators {
-                HStack {
-                    ForEach(0..<content.count, id: \.self) { index in
-                        Circle()
-                            .fill(indicatorColor.opacity(index == self.index ?? 0 ? 1 : 0.3))
-                            .frame(width: indicatorSize)
-                            .padding(.horizontal, indicatorGap)
-                            
+                ScrollView(.horizontal, showsIndicators: false) {
+                    ScrollViewReader { proxy in
+                        HStack(spacing: indicatorGap) {
+                            ForEach(0..<content.count, id: \.self) { itemIndex in
+                                Circle()
+                                    .fill(indicatorColor.opacity(itemIndex == self.index ?? 0 ? 1 : 0.3))
+                                    .frame(width: itemIndex == self.index ? indicatorSize * 1.5 : indicatorSize)
+                                    .animation(.easeInOut(duration: 0.3), value: self.index)
+                                    .id(itemIndex)
+                            }
+                        }
+                        .onChange(of: index) { _, newValue in
+                            if let newValue = newValue {
+                                withAnimation {
+                                    proxy.scrollTo(newValue, anchor: .center)
+                                }
+                            }
+                        }
                     }
                 }
+                .frame(width: dynamicWidth / 2)
                 .padding(.vertical, 16)
+                .allowsHitTesting(false)
             }
         }
         .frame(maxHeight: .infinity)
