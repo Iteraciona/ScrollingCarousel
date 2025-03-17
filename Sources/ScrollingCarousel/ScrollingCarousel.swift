@@ -92,6 +92,7 @@ public struct ScrollingCarousel<Content: View>: View {
                                     .id(itemIndex)
                             }
                         }
+                        .frame(width: dynamicWidth)
                         .onChange(of: index) { _, newValue in
                             if let newValue = newValue {
                                 withAnimation {
